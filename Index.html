@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yosea Kristiawan Ultimate Calculator</title>
+    <style>
+        :root {
+            --bg: #0a0a0a;
+            --card: #141414;
+            --accent: #f59e0b;
+            --text: #ffffff;
+            --btn-num: #262626;
+            --btn-op: #3f3f46;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            padding: 10px;
+            margin: 0;
+        }
+
+        .calc-container {
+            background: var(--card);
+            width: 100%;
+            max-width: 380px;
+            border-radius: 24px;
+            padding: 20px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            border: 1px solid #262626;
+            box-sizing: border-box;
+        }
+
+        .brand {
+            text-align: center;
+            font-size: 0.7rem;
+            letter-spacing: 2px;
+            color: var(--accent);
+            text-transform: uppercase;
+            margin-bottom: 15px;
+        }
+
+        .screen {
+            text-align: right;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: rgba(255,255,255,0.02);
+            border-radius: 12px;
+            min-height: 100px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+
+        #operation { font-size: 1.1rem; color: #71717a; min-height: 1.5rem; margin-bottom: 5px; overflow: hidden; }
+        #main-display { font-size: 2.8rem; font-weight: 300; word-wrap: break-word; overflow: hidden; }
+
+        .standard-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        button {
+            border: none;
+            height: 60px;
+            border-radius: 15px;
+            font-size: 1.4rem;
+            font-weight: 600;
+            cursor: pointer;
+            color: white;
+            transition: 0.1s;
+        }
+
+        button:active { filter: brightness(1.5); transform: scale(0.95); }
+        .num { background: var(--btn-num); }
+        .op { background: var(--btn-op); font-size: 1.6rem; }
+        .eq { background: var(--accent); color: black; }
+        .clear { background: #7f1d1d; }
+
+        /* Bagian Aritmatika */
+        .arithmetic-box {
+            background: #1c1c1c;
+            padding: 18px;
+            border-radius: 20px;
+            border: 1px solid #333;
+            box-sizing: border-box;
+        }
+
+        .arithmetic-title {
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        .input-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .field label {
+            font-size: 0.7rem;
+            color: #a1a1aa;
+            margin-bottom: 5px;
+        }
+
+        input {
+            background: #09090b;
+            border: 1px solid #3f3f46;
+            color: white;
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 1rem;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .arith-btns {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .btn-small {
+            height: 45px;
+            font-size: 0.85rem;
+            background: #3f3f46;
+        }
+    </style>
+</head>
+<body>
+
+<div class="calc-container">
+    <div class="brand">Created by Yosea Kristiawan</div>
+    
+    <div class="screen">
+        <div id="operation"></div>
+        <div id="main-display">0</div>
+    </div>
+
+    <div class="standard-grid">
+        <button class="clear" onclick="clearScreen()">C</button>
+        <button class="op" onclick="appendOp('/')">÷</button>
+        <button class="op" onclick="appendOp('*')">×</button>
+        <button class="op" onclick="deleteLast()">⌫</button>
+        
+        <button class="num" onclick="appendNum('7')">7</button>
+        <button class="num" onclick="appendNum('8')">8</button>
+        <button class="num" onclick="appendNum('9')">9</button>
+        <button class="op" onclick="appendOp('-')">-</button>
+        
+        <button class="num" onclick="appendNum('4')">4</button>
+        <button class="num" onclick="appendNum('5')">5</button>
+        <button class="num" onclick="appendNum('6')">6</button>
+        <button class="op" onclick="appendOp('+')">+</button>
+        
+        <button class="num" onclick="appendNum('1')">1</button>
+        <button class="num" onclick="appendNum('2')">2</button>
+        <button class="num" onclick="appendNum('3')">3</button>
+        <button class="eq" onclick="calculate()">=</button>
+        
+        <button class="num" style="grid-column: span 2;" onclick="appendNum('0')">0</button>
+        <button class="num" onclick="appendNum('.')">.</button>
+    </div>
+
+    <div class="arithmetic-box">
+        <div class="arithmetic-title">Aritmatika (Baris & Deret)</div>
+        <div class="input-row">
+            <div class="field">
+                <label>Suku-1 (a)</label>
+                <input type="number" id="a">
+            </div>
+            <div class="field">
+                <label>Beda (b)</label>
+                <input type="number" id="b">
+            </div>
+            <div class="field">
+                <label>Suku ke-n (n)</label>
+                <input type="number" id="n">
+            </div>
+            <div class="field">
+                <label>Nilai Suku (Un)</label>
+                <input type="number" id="un">
+            </div>
+        </div>
+        <div class="arith-btns">
+            <button class="btn-small" onclick="calcUn()">Cari Un</button>
+            <button class="btn-small" onclick="calcSn()">Cari Sn</button>
+            <button class="btn-small" onclick="calcA()">Cari a</button>
+            <button class="btn-small" onclick="calcB()">Cari b</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let display = document.getElementById('main-display');
+    let opDisplay = document.getElementById('operation');
+    let currentInput = "";
+
+    function appendNum(num) {
+        if (currentInput === "0") currentInput = "";
+        currentInput += num;
+        updateDisplay();
+    }
+
+    function appendOp(op) {
+        if (currentInput === "" && op !== '-') return;
+        // Mencegah dua operator berurutan
+        const lastChar = currentInput.slice(-1);
+        if (['+', '-', '*', '/'].includes(lastChar)) {
+            currentInput = currentInput.slice(0, -1);
+        }
+        currentInput += op;
+        updateDisplay();
+    }
+
+    function updateDisplay() {
+        // Mengubah simbol internal (* dan /) menjadi simbol visual (× dan ÷) di layar
+        let visualText = currentInput.replace(/\*/g, '×').replace(/\//g, '÷');
+        display.innerText = visualText || "0";
+    }
+
+    function clearScreen() {
+        currentInput = "";
+        display.innerText = "0";
+        opDisplay.innerText = "";
+    }
+
+    function deleteLast() {
+        currentInput = currentInput.toString().slice(0, -1);
+        updateDisplay();
+    }
+
+    function calculate() {
+        try {
+            if (currentInput === "") return;
+            opDisplay.innerText = currentInput.replace(/\*/g, '×').replace(/\//g, '÷') + " =";
+            let result = eval(currentInput);
+            currentInput = result.toString();
+            display.innerText = currentInput;
+        } catch {
+            display.innerText = "Error";
+            currentInput = "";
+        }
+    }
+
+    // Fungsi Aritmatika
+    const getVal = (id) => parseFloat(document.getElementById(id).value);
+    
+    function showResult(res) {
+        display.innerText = res;
+        opDisplay.innerText = "Hasil Aritmatika:";
+        currentInput = res.toString();
+    }
+
+    function calcUn() {
+        let a = getVal('a'), b = getVal('b'), n = getVal('n');
+        if (isNaN(a) || isNaN(b) || isNaN(n)) return alert("Isi a, b, dan n!");
+        showResult(a + (n - 1) * b);
+    }
+
+    function calcSn() {
+        let a = getVal('a'), b = getVal('b'), n = getVal('n');
+        if (isNaN(a) || isNaN(b) || isNaN(n)) return alert("Isi a, b, dan n!");
+        showResult((n / 2) * (2 * a + (n - 1) * b));
+    }
+
+    function calcA() {
+        let b = getVal('b'), n = getVal('n'), un = getVal('un');
+        if (isNaN(b) || isNaN(n) || isNaN(un)) return alert("Isi b, n, dan Un!");
+        showResult(un - (n - 1) * b);
+    }
+
+    function calcB() {
+        let a = getVal('a'), n = getVal('n'), un = getVal('un');
+        if (isNaN(a) || isNaN(n) || isNaN(un)) return alert("Isi a, n, dan Un!");
+        showResult((un - a) / (n - 1));
+    }
+</script>
+
+</body>
+</html>
